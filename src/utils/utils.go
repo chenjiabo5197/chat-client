@@ -1,16 +1,15 @@
 package utils
 
 import (
+	"common"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"net"
-	"vs_code/project0007/common"
 )
 
 //定义一个结构体，将传输的函数都绑定在它身上
-type Transfer struct{
-
+type Transfer struct {
 	Conn net.Conn
 
 	//传输时的缓存，先定义数组，使用时当做byte切片
@@ -20,7 +19,7 @@ type Transfer struct{
 /*
 	接收函数，用于反序列化接收的数据，并将反序列化的结果返回
 */
-func (t *Transfer) ReadPkg() (mes common.Message, err error){
+func (t *Transfer) ReadPkg() (mes common.Message, err error) {
 	//创建byte切片，用于接收用户输入
 	//buf := make([]byte, 4096)
 	/*
@@ -29,9 +28,9 @@ func (t *Transfer) ReadPkg() (mes common.Message, err error){
 	*/
 	n, err := t.Conn.Read(t.buf[:4])
 
-	if n != 4 || err != nil{
+	if n != 4 || err != nil {
 		// err = errors.New("读取数据长度失败")
-		fmt.Println("读取data数据长度失败,err=",err)
+		fmt.Println("读取data数据长度失败,err=", err)
 		return
 	}
 	//fmt.Println("读到的buf=",t.buf[:4])
@@ -39,13 +38,13 @@ func (t *Transfer) ReadPkg() (mes common.Message, err error){
 	n, err = t.Conn.Read(t.buf[:dataLen])
 	if n != int(dataLen) || err != nil {
 		// err = errors.New("读取数据失败")
-		fmt.Println("读取data数据失败,err=",err)
+		fmt.Println("读取data数据失败,err=", err)
 		return
 	}
 	//将读取到的消息反序列化
 	err = json.Unmarshal(t.buf[:dataLen], &mes)
-	if err != nil{
-		fmt.Println("消息反序列化失败,err=",err)
+	if err != nil {
+		fmt.Println("消息反序列化失败,err=", err)
 		return
 	}
 	return
@@ -54,7 +53,7 @@ func (t *Transfer) ReadPkg() (mes common.Message, err error){
 /*
 	发送函数，用于向目标发送已经序列化好的数据
 */
-func (t *Transfer) WritePkg(data []byte) (err error){
+func (t *Transfer) WritePkg(data []byte) (err error) {
 
 	//为了确保tcp发送消息的准确性，先发送mes的长度，再发送mes消息本体
 	//先获取data这个byte切片的长度，然后将长度数据转化为一个byte切片
@@ -65,14 +64,14 @@ func (t *Transfer) WritePkg(data []byte) (err error){
 	binary.BigEndian.PutUint32(t.buf[:4], dataLen)
 	//发送长度数据
 	n, err := t.Conn.Write(t.buf[:4])
-	if n != 4 || err != nil{
-		fmt.Println("发送data长度失败,err=",err)
+	if n != 4 || err != nil {
+		fmt.Println("发送data长度失败,err=", err)
 		return
 	}
 	//发送数据
 	_, err = t.Conn.Write(data)
-	if err != nil{
-		fmt.Println("发送data失败,err=",err)
+	if err != nil {
+		fmt.Println("发送data失败,err=", err)
 		return
 	}
 	return

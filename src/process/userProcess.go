@@ -1,18 +1,17 @@
 package process
 
 import (
+	"common"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"model"
 	"net"
-	"vs_code/project0007/client/model"
-	"vs_code/project0007/client/utils"
-	"vs_code/project0007/common"
+	"utils"
 )
 
-type UserProcessor struct{
-
+type UserProcessor struct {
 }
 
 /*
@@ -24,7 +23,7 @@ func (up *UserProcessor) Login(userId int, userPwd string) (err error) {
 
 	//连接到服务器
 	conn, err := net.Dial("tcp", "127.0.0.1:8888")
-	if err != nil{
+	if err != nil {
 		fmt.Println("连接服务器出错，err=", err)
 		return
 	}
@@ -43,7 +42,7 @@ func (up *UserProcessor) Login(userId int, userPwd string) (err error) {
 
 	//将登陆的消息序列化,返回的是一个byte切片
 	data, err := json.Marshal(loginMes)
-	if err != nil{
+	if err != nil {
 		fmt.Println("登陆消息json Marshal出错")
 		return
 	}
@@ -51,7 +50,7 @@ func (up *UserProcessor) Login(userId int, userPwd string) (err error) {
 
 	//将发送的消息序列化,若转换不出错，data即要发送的数据，data为切片类型
 	data, err = json.Marshal(mes)
-	if err != nil{
+	if err != nil {
 		fmt.Println("发送消息json Marshal出错")
 		return
 	}
@@ -65,8 +64,8 @@ func (up *UserProcessor) Login(userId int, userPwd string) (err error) {
 	binary.BigEndian.PutUint32(dataLenbytes[:4], dataLen)
 	//发送长度数据
 	n, err := conn.Write(dataLenbytes[:4])
-	if n != 4 || err != nil{
-		fmt.Println("发送data长度失败,err=",err)
+	if n != 4 || err != nil {
+		fmt.Println("发送data长度失败,err=", err)
 		return
 	}
 
@@ -74,8 +73,8 @@ func (up *UserProcessor) Login(userId int, userPwd string) (err error) {
 
 	//发送数据
 	_, err = conn.Write(data)
-	if err != nil{
-		fmt.Println("发送data失败,err=",err)
+	if err != nil {
+		fmt.Println("发送data失败,err=", err)
 		return
 	}
 
@@ -86,27 +85,26 @@ func (up *UserProcessor) Login(userId int, userPwd string) (err error) {
 	*/
 	// time.Sleep(10 * time.Second)
 	tf := utils.Transfer{
-		Conn:conn,
+		Conn: conn,
 	}
 	mes, err = tf.ReadPkg()
-	if err != nil{
-		fmt.Println("读取服务器返回出错,err=",err)
+	if err != nil {
+		fmt.Println("读取服务器返回出错,err=", err)
 		return
 	}
 
 	//将服务器返回消息反序列化为LoginResMes结构体
 	var loginResMes common.LoginResMes
 	err = json.Unmarshal([]byte(mes.Data), &loginResMes)
-	if err != nil{
-		fmt.Println("反序列化服务器返回结果出错,err=",err)
+	if err != nil {
+		fmt.Println("反序列化服务器返回结果出错,err=", err)
 		return
 	}
 
 	//判断是否登录成功
-	if loginResMes.ResCode == 200{
+	if loginResMes.ResCode == 200 {
 		//初始化curUser
-		curUser = model.CurUser{
-		}
+		curUser = model.CurUser{}
 		curUser.Conn = conn
 		curUser.UserId = userId
 		curUser.UserStatus = common.UserOnline
@@ -118,30 +116,29 @@ func (up *UserProcessor) Login(userId int, userPwd string) (err error) {
 			}
 			//初始化onlineUsers
 			user := &common.User{
-				UserId :     v,
-				UserStatus : common.UserOnline,
+				UserId:     v,
+				UserStatus: common.UserOnline,
 			}
 			onlineUsers[v] = user
-			
+
 			fmt.Println("在线用户 : ", v)
 		}
 		go serverProcessMes(conn)
 		showMenu()
 		return nil
-	}else{
+	} else {
 		return errors.New(loginResMes.Error)
 	}
 }
 
-
 /*
 	完成注册函数，传入userId和userPwd和userName,返回服务器返回的注册结果
 */
-func (up *UserProcessor) Register (user common.User) (err error) {
+func (up *UserProcessor) Register(user common.User) (err error) {
 
 	//连接到服务器
 	conn, err := net.Dial("tcp", "127.0.0.1:8888")
-	if err != nil{
+	if err != nil {
 		fmt.Println("连接服务器出错，err=", err)
 		return
 	}
@@ -155,12 +152,12 @@ func (up *UserProcessor) Register (user common.User) (err error) {
 	mes.Type = common.RegisterMesType
 
 	rigister := common.RegisterMes{
-		User : user,
+		User: user,
 	}
 
 	//将注册的消息序列化,返回的是一个byte切片
 	data, err := json.Marshal(rigister)
-	if err != nil{
+	if err != nil {
 		fmt.Println("注册消息json Marshal出错")
 		return
 	}
@@ -168,7 +165,7 @@ func (up *UserProcessor) Register (user common.User) (err error) {
 
 	//将发送的消息序列化,若转换不出错，data即要发送的数据，data为切片类型
 	data, err = json.Marshal(mes)
-	if err != nil{
+	if err != nil {
 		fmt.Println("发送消息json Marshal出错")
 		return
 	}
@@ -182,40 +179,39 @@ func (up *UserProcessor) Register (user common.User) (err error) {
 	binary.BigEndian.PutUint32(dataLenbytes[:4], dataLen)
 	//发送长度数据
 	n, err := conn.Write(dataLenbytes[:4])
-	if n != 4 || err != nil{
-		fmt.Println("发送data长度失败,err=",err)
+	if n != 4 || err != nil {
+		fmt.Println("发送data长度失败,err=", err)
 		return
 	}
 
 	//发送数据
 	_, err = conn.Write(data)
-	if err != nil{
-		fmt.Println("发送data失败,err=",err)
+	if err != nil {
+		fmt.Println("发送data失败,err=", err)
 		return
 	}
 
 	tf := utils.Transfer{
-		Conn:conn,
+		Conn: conn,
 	}
 	mes, err = tf.ReadPkg()
-	if err != nil{
-		fmt.Println("读取服务器返回出错,err=",err)
+	if err != nil {
+		fmt.Println("读取服务器返回出错,err=", err)
 		return
 	}
 
 	//将服务器返回消息反序列化为LoginResMes结构体
 	var rigisterResMes common.RegisterResMes
 	err = json.Unmarshal([]byte(mes.Data), &rigisterResMes)
-	if err != nil{
-		fmt.Println("反序列化服务器返回结果出错,err=",err)
+	if err != nil {
+		fmt.Println("反序列化服务器返回结果出错,err=", err)
 		return
 	}
 
 	//判断是否注册成功
-	if rigisterResMes.ResCode == 200{
+	if rigisterResMes.ResCode == 200 {
 		return nil
-	}else{
+	} else {
 		return errors.New(rigisterResMes.Error)
 	}
 }
-

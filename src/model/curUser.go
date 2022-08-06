@@ -1,8 +1,8 @@
 package model
 
 import (
+	"common"
 	"net"
-	"vs_code/project0007/common"
 )
 
 /*

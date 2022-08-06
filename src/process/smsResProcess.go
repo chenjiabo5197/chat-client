@@ -1,18 +1,18 @@
 package process
 
 import (
+	"common"
 	"encoding/json"
 	"fmt"
-	"vs_code/project0007/common"
 )
 
 /*
 	展示服务器转发的聊天信息
- */
+*/
 func showGroupSms(mes *common.Message) (err error) {
 	var smsMes common.SmsResMes
 	err = json.Unmarshal([]byte(mes.Data), &smsMes)
-	if err !=nil {
+	if err != nil {
 		fmt.Println("smsResMes反序列化失败,err=", err)
 		return
 	}

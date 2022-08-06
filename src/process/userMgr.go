@@ -1,15 +1,15 @@
 package process
 
 import (
+	"common"
 	"fmt"
-	"vs_code/project0007/client/model"
-	"vs_code/project0007/common"
+	"model"
 )
 
 //客户端要维护一个map
 var (
 	onlineUsers map[int]*common.User = make(map[int]*common.User) //保存在线用户信息
-	curUser model.CurUser                                         //初始化，用于向服务器发送聊天信息
+	curUser     model.CurUser                                     //初始化，用于向服务器发送聊天信息
 )
 
 /*
@@ -17,7 +17,7 @@ var (
 */
 func showOnlineUsers() {
 	fmt.Println("在线用户列表：")
-	for k, _ := range onlineUsers {
+	for k := range onlineUsers {
 		fmt.Println("用户id：", k)
 	}
 }
@@ -31,17 +31,15 @@ func updateUserStatus(notifyMes *common.NotifyUserStatusMes) {
 	user, ok := onlineUsers[notifyMes.UserId]
 	if !ok {
 		user = &common.User{
-			UserId : notifyMes.UserId,
+			UserId: notifyMes.UserId,
 		}
 	}
 	if notifyMes.UserStatus == common.UserOnline {
 		user.UserStatus = common.UserOnline
 		onlineUsers[user.UserId] = user
-	}else {
+	} else {
 		delete(onlineUsers, user.UserId)
 	}
 
 	showOnlineUsers()
 }
-
-

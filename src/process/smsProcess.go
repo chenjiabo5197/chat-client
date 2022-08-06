@@ -1,21 +1,20 @@
 package process
 
 import (
+	"common"
 	"encoding/json"
 	"fmt"
-	"vs_code/project0007/client/utils"
-	"vs_code/project0007/common"
+	"utils"
 )
 
 //处理聊天消息的结构体
 type SmsProcessor struct {
-
 }
 
 /*
 	向服务器发送聊天消息的方法
 */
-func (sm *SmsProcessor) sendGroupSms (content string) (err error) {
+func (sm *SmsProcessor) sendGroupSms(content string) (err error) {
 	var smsMes common.SmsMes
 	smsMes.Content = content
 	smsMes.UserId = curUser.UserId
@@ -24,7 +23,7 @@ func (sm *SmsProcessor) sendGroupSms (content string) (err error) {
 		fmt.Println("smsMes序列化失败")
 		return
 	}
-	
+
 	var mes common.Message
 	mes.Type = common.SmsMesType
 	mes.Data = string(data)
@@ -34,13 +33,13 @@ func (sm *SmsProcessor) sendGroupSms (content string) (err error) {
 		return
 	}
 
-	tf := utils.Transfer {
+	tf := utils.Transfer{
 		Conn: curUser.Conn,
 	}
 
 	err = tf.WritePkg(data)
 	if err != nil {
-		fmt.Println("发送sms消息失败,err=",err)
+		fmt.Println("发送sms消息失败,err=", err)
 		return
 	}
 	return
