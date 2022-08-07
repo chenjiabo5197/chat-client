@@ -2,19 +2,19 @@ package common
 
 const (
 	LoginMesType            = "LoginMes"
-	LoginResMesType         = "LoginResMes"
+	LoginRespMesType        = "LoginRespMes"
 	RegisterMesType         = "RegisterMes"
-	RegisterResMesType      = "RegisterResMes"
+	RegisterRespMesType     = "RegisterRespMes"
 	NotifyUserStatusMesType = "NotifyUserStatusMes"
 	SmsMesType              = "SmsMes"
-	SmsResMesType           = "SmsResMes"
+	SmsRespMesType          = "SmsRespMes"
 )
 
 //定义几个用户在线状态
 const (
 	UserOnline = iota
 	UserOffline
-	Userbusy
+	UserBusy
 )
 
 type Message struct {
@@ -34,10 +34,10 @@ type LoginMes struct {
 /*
 	服务器端返回的登录的结果消息
 */
-type LoginResMes struct {
-	ResCode int    `json:"rescode"`
-	Error   string `json:"error"`
-	UsersId []int
+type LoginRespMes struct {
+	RespCode int    `json:"respcode"`
+	Error    string `json:"error"`
+	UsersId  []int
 }
 
 /*
@@ -60,9 +60,9 @@ type User struct {
 /*
 	服务器端返回的注册的结果消息
 */
-type RegisterResMes struct {
-	ResCode int    `json:"rescode"`
-	Error   string `json:"error"`
+type RegisterRespMes struct {
+	RespCode int    `json:"respcode"`
+	Error    string `json:"error"`
 }
 
 /*
@@ -85,7 +85,7 @@ type SmsMes struct {
 /*
 	服务器转发聊天消息的结构体
 */
-type SmsResMes struct {
+type SmsRespMes struct {
 	User           //匿名结构体
 	Content string `json:"content"`
 }

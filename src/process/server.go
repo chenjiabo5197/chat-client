@@ -85,7 +85,7 @@ func serverProcessMes(conn net.Conn) {
 			}
 			//更新onlineUsers 这个map
 			updateUserStatus(&notifyMes)
-		case common.SmsResMesType:
+		case common.SmsRespMesType:
 			//服务器转发的消息
 			err = showGroupSms(&mes)
 			if err != nil {

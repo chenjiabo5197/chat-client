@@ -93,16 +93,18 @@ func (up *UserProcessor) Login(userId int, userPwd string) (err error) {
 		return
 	}
 
+	fmt.Printf("service resp login mes=%s\n", utils.Struct2String(mes))
+
 	//将服务器返回消息反序列化为LoginResMes结构体
-	var loginResMes common.LoginResMes
-	err = json.Unmarshal([]byte(mes.Data), &loginResMes)
+	var loginRespMes common.LoginRespMes
+	err = json.Unmarshal([]byte(mes.Data), &loginRespMes)
 	if err != nil {
 		fmt.Println("反序列化服务器返回结果出错,err=", err)
 		return
 	}
 
 	//判断是否登录成功
-	if loginResMes.ResCode == 200 {
+	if loginRespMes.RespCode == 200 {
 		//初始化curUser
 		curUser = model.CurUser{}
 		curUser.Conn = conn
@@ -110,7 +112,7 @@ func (up *UserProcessor) Login(userId int, userPwd string) (err error) {
 		curUser.UserStatus = common.UserOnline
 
 		//显示服务器返回的在线用户列表
-		for _, v := range loginResMes.UsersId {
+		for _, v := range loginRespMes.UsersId {
 			if v == userId {
 				continue
 			}
@@ -127,7 +129,7 @@ func (up *UserProcessor) Login(userId int, userPwd string) (err error) {
 		showMenu()
 		return nil
 	} else {
-		return errors.New(loginResMes.Error)
+		return errors.New(loginRespMes.Error)
 	}
 }
 
@@ -201,17 +203,17 @@ func (up *UserProcessor) Register(user common.User) (err error) {
 	}
 
 	//将服务器返回消息反序列化为LoginResMes结构体
-	var rigisterResMes common.RegisterResMes
-	err = json.Unmarshal([]byte(mes.Data), &rigisterResMes)
+	var rigisterRespMes common.RegisterRespMes
+	err = json.Unmarshal([]byte(mes.Data), &rigisterRespMes)
 	if err != nil {
 		fmt.Println("反序列化服务器返回结果出错,err=", err)
 		return
 	}
 
 	//判断是否注册成功
-	if rigisterResMes.ResCode == 200 {
+	if rigisterRespMes.ResCode == 200 {
 		return nil
 	} else {
-		return errors.New(rigisterResMes.Error)
+		return errors.New(rigisterRespMes.Error)
 	}
 }
