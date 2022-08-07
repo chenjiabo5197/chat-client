@@ -4,6 +4,7 @@ import (
 	"common"
 	"encoding/json"
 	"fmt"
+	"model"
 	"net"
 	"strconv"
 	"utils"
@@ -15,11 +16,11 @@ import (
 	3、当读取到服务器发送的消息后，显示在界面
 */
 
-func showMenu() {
+func showMenu(user *model.CurUser) {
 
 	recommend := true
 	for recommend {
-		fmt.Println("------------恭喜XXX登录系统----------")
+		fmt.Printf("------------恭喜%s登录系统----------\n", user.UserName)
 		fmt.Println("          1、显示在线用户列表          ")
 		fmt.Println("          2、发送消息          ")
 		fmt.Println("          3、消息列表          ")
@@ -35,12 +36,16 @@ func showMenu() {
 		switch key {
 		case 1:
 			// fmt.Println("1")
-			showOnlineUsers()
+			queryAllOnlineUsers(user)
 		case 2:
 			//fmt.Println("2")
 			fmt.Println("请输入要发送的消息:")
 			fmt.Scanln(&content)
-			sp := SmsProcessor{}
+			sp := SmsProcessor{
+				Conn:     user.Conn,
+				UserName: user.UserName,
+				UserId:   user.UserId,
+			}
 			err := sp.sendGroupSms(content)
 			if err != nil {
 				fmt.Println("发送消息失败,err=", err)
@@ -83,8 +88,9 @@ func serverProcessMes(conn net.Conn) {
 				fmt.Println("notifyMes反序列化失败,err=", err)
 				return
 			}
+			fmt.Printf("recv server online and offline mes, data=%s\n", utils.Struct2String(notifyMes))
 			//更新onlineUsers 这个map
-			updateUserStatus(&notifyMes)
+			//updateUserStatus(&notifyMes)
 		case common.SmsRespMesType:
 			//服务器转发的消息
 			err = showGroupSms(&mes)
@@ -92,6 +98,8 @@ func serverProcessMes(conn net.Conn) {
 				fmt.Println("err=", err)
 				return
 			}
+		case common.AllOnlineRespType: // 用户在线消息
+			showAllOnlineUser(&mes.Data)
 		default:
 			fmt.Println("未知数据类型")
 		}

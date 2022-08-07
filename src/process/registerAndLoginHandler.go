@@ -17,7 +17,7 @@ type UserProcessor struct {
 /*
 	完成登录函数，传入userId和userPwd,返回服务器返回的登陆结果
 */
-func (up *UserProcessor) Login(userId int, userPwd string) (err error) {
+func (up *UserProcessor) LoginHandler(userId int, userPwd string) (err error) {
 	// fmt.Printf("用户输入的id=%d,密码=%s", userId, userPwd)
 	// return nil
 
@@ -106,27 +106,28 @@ func (up *UserProcessor) Login(userId int, userPwd string) (err error) {
 	//判断是否登录成功
 	if loginRespMes.RespCode == 200 {
 		//初始化curUser
-		curUser = model.CurUser{}
+		curUser := &model.CurUser{}
 		curUser.Conn = conn
 		curUser.UserId = userId
+		curUser.UserName = loginRespMes.UserName
 		curUser.UserStatus = common.UserOnline
 
 		//显示服务器返回的在线用户列表
-		for _, v := range loginRespMes.UsersId {
-			if v == userId {
-				continue
-			}
-			//初始化onlineUsers
-			user := &common.User{
-				UserId:     v,
-				UserStatus: common.UserOnline,
-			}
-			onlineUsers[v] = user
-
-			fmt.Println("在线用户 : ", v)
-		}
+		//for _, v := range loginRespMes.UsersId {
+		//	if v == userId {
+		//		continue
+		//	}
+		//	//初始化onlineUsers
+		//	user := &common.User{
+		//		UserId:     v,
+		//		UserStatus: common.UserOnline,
+		//	}
+		//	onlineUsers[v] = user
+		//
+		//	fmt.Println("在线用户 : ", v)
+		//}
 		go serverProcessMes(conn)
-		showMenu()
+		showMenu(curUser)
 		return nil
 	} else {
 		return errors.New(loginRespMes.Error)
@@ -136,7 +137,7 @@ func (up *UserProcessor) Login(userId int, userPwd string) (err error) {
 /*
 	完成注册函数，传入userId和userPwd和userName,返回服务器返回的注册结果
 */
-func (up *UserProcessor) Register(user common.User) (err error) {
+func (up *UserProcessor) RegisterHandler(user common.User) (err error) {
 
 	//连接到服务器
 	conn, err := net.Dial("tcp", "127.0.0.1:8888")
@@ -211,7 +212,7 @@ func (up *UserProcessor) Register(user common.User) (err error) {
 	}
 
 	//判断是否注册成功
-	if rigisterRespMes.ResCode == 200 {
+	if rigisterRespMes.RespCode == 200 {
 		return nil
 	} else {
 		return errors.New(rigisterRespMes.Error)

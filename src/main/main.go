@@ -88,11 +88,9 @@ func main() {
 					continue
 				}
 				up := process.UserProcessor{}
-				err = up.Login(userId, userPwd)
+				err = up.LoginHandler(userId, userPwd)
 				if err != nil {
 					fmt.Println("登陆失败,err=", err)
-				} else {
-					fmt.Println("登录成功")
 				}
 				loop = false
 			case 2:
@@ -101,7 +99,7 @@ func main() {
 					continue
 				}
 				up := process.UserProcessor{}
-				err = up.Register(user)
+				err = up.RegisterHandler(user)
 				if err != nil {
 					fmt.Println("注册失败,err=", err)
 				} else {

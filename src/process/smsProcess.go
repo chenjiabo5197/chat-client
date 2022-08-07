@@ -4,11 +4,15 @@ import (
 	"common"
 	"encoding/json"
 	"fmt"
+	"net"
 	"utils"
 )
 
 //处理聊天消息的结构体
 type SmsProcessor struct {
+	Conn     net.Conn
+	UserName string
+	UserId   int
 }
 
 /*
@@ -17,7 +21,7 @@ type SmsProcessor struct {
 func (sm *SmsProcessor) sendGroupSms(content string) (err error) {
 	var smsMes common.SmsMes
 	smsMes.Content = content
-	smsMes.UserId = curUser.UserId
+	smsMes.UserId = sm.UserId
 	data, err := json.Marshal(smsMes)
 	if err != nil {
 		fmt.Println("smsMes序列化失败")
@@ -34,7 +38,7 @@ func (sm *SmsProcessor) sendGroupSms(content string) (err error) {
 	}
 
 	tf := utils.Transfer{
-		Conn: curUser.Conn,
+		Conn: sm.Conn,
 	}
 
 	err = tf.WritePkg(data)
