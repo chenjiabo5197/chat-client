@@ -22,9 +22,10 @@ func showMenu(user *model.CurUser) {
 	for recommend {
 		fmt.Printf("------------恭喜%s登录系统----------\n", user.UserName)
 		fmt.Println("          1、显示在线用户列表          ")
-		fmt.Println("          2、发送消息          ")
-		fmt.Println("          3、消息列表          ")
-		fmt.Println("          4、退出系统          ")
+		fmt.Println("          2、发送广播消息          ")
+		fmt.Println("          3、发送1对1消息          ")
+		fmt.Println("          4、消息列表          ")
+		fmt.Println("          5、退出系统          ")
 		fmt.Println("请选择(1-4):")
 		var input string
 		var content string
@@ -51,13 +52,27 @@ func showMenu(user *model.CurUser) {
 				fmt.Println("发送消息失败,err=", err)
 			}
 		case 3:
-			fmt.Println("3")
+			var userName string
+			fmt.Println("请输入要发送消息的对象名称:")
+			fmt.Scanln(&userName)
+			fmt.Println("请输入要发送消息的内容:")
+			fmt.Scanln(&content)
+			sp := SmsProcessor{
+				Conn:     user.Conn,
+				UserName: user.UserName,
+				UserId:   user.UserId,
+			}
+			err := sp.sendToOneSms(content, userName)
+			if err != nil {
+				fmt.Println("发送消息失败,err=", err)
+			}
 		case 4:
+			fmt.Println("3")
+		case 5:
 			fmt.Println("退出系统")
 			recommend = false
 		default:
 			fmt.Println("error")
-
 		}
 	}
 
