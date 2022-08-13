@@ -2,7 +2,6 @@ package process
 
 import (
 	"common"
-	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,10 +13,8 @@ import (
 type UserProcessor struct {
 }
 
-/*
-	完成登录函数，传入userId和userPwd,返回服务器返回的登陆结果
-*/
-func (up *UserProcessor) LoginHandler(userId int, userPwd string) (err error) {
+// LoginHandler 完成登录函数，传入userName和userPwd,返回服务器返回的登陆结果
+func (up *UserProcessor) LoginHandler(userName string, userPwd string) (err error) {
 	// fmt.Printf("用户输入的id=%d,密码=%s", userId, userPwd)
 	// return nil
 
@@ -37,7 +34,8 @@ func (up *UserProcessor) LoginHandler(userId int, userPwd string) (err error) {
 	mes.Type = common.LoginMesType
 	//再创建一个登陆的消息实例
 	var loginMes common.LoginMes
-	loginMes.UserId = userId
+	loginMes.UserId = utils.GetMd5Value(userName)
+	loginMes.UserName = userName
 	loginMes.UserPwd = userPwd
 
 	//将登陆的消息序列化,返回的是一个byte切片
@@ -55,27 +53,13 @@ func (up *UserProcessor) LoginHandler(userId int, userPwd string) (err error) {
 		return
 	}
 
-	//为了确保tcp发送消息的准确性，先发送mes的长度给服务器，再发送mes消息本体
-	//先获取data这个byte切片的长度，然后将长度数据转化为一个byte切片
-	var dataLen uint32
-	dataLen = uint32(len(data))
-	var dataLenbytes [4]byte
-	//此函数可以将传入的一个uint32的数值转化为一个byte切片
-	binary.BigEndian.PutUint32(dataLenbytes[:4], dataLen)
-	//发送长度数据
-	n, err := conn.Write(dataLenbytes[:4])
-	if n != 4 || err != nil {
-		fmt.Println("发送data长度失败,err=", err)
-		return
+	tf := utils.Transfer{
+		Conn: conn,
 	}
-
-	// fmt.Printf("发送数据长度=%d, 内容=%s\n", len(data), string(data))
-
-	//发送数据
-	_, err = conn.Write(data)
+	err = tf.WritePkg(data)
 	if err != nil {
-		fmt.Println("发送data失败,err=", err)
-		return
+		fmt.Printf("send data to server err, err=%v\n", err)
+		return err
 	}
 
 	/*
@@ -84,9 +68,6 @@ func (up *UserProcessor) LoginHandler(userId int, userPwd string) (err error) {
 		后面在服务器端 增加err == io.EOF判断是否是客户端关闭了conn连接
 	*/
 	// time.Sleep(10 * time.Second)
-	tf := utils.Transfer{
-		Conn: conn,
-	}
 	mes, err = tf.ReadPkg()
 	if err != nil {
 		fmt.Println("读取服务器返回出错,err=", err)
@@ -108,7 +89,7 @@ func (up *UserProcessor) LoginHandler(userId int, userPwd string) (err error) {
 		//初始化curUser
 		curUser := &model.CurUser{}
 		curUser.Conn = conn
-		curUser.UserId = userId
+		curUser.UserId = utils.GetMd5Value(userName)
 		curUser.UserName = loginRespMes.UserName
 		curUser.UserStatus = common.UserOnline
 
@@ -173,28 +154,16 @@ func (up *UserProcessor) RegisterHandler(user common.User) (err error) {
 		return
 	}
 
-	//为了确保tcp发送消息的准确性，先发送mes的长度给服务器，再发送mes消息本体
-	//先获取data这个byte切片的长度，然后将长度数据转化为一个byte切片
-	var dataLen uint32
-	dataLen = uint32(len(data))
-	var dataLenbytes [4]byte
-	//此函数可以将传入的一个uint32的数值转化为一个byte切片
-	binary.BigEndian.PutUint32(dataLenbytes[:4], dataLen)
-	//发送长度数据
-	n, err := conn.Write(dataLenbytes[:4])
-	if n != 4 || err != nil {
-		fmt.Println("发送data长度失败,err=", err)
-		return
-	}
-
-	//发送数据
-	_, err = conn.Write(data)
-	if err != nil {
-		fmt.Println("发送data失败,err=", err)
-		return
-	}
-
 	tf := utils.Transfer{
+		Conn: conn,
+	}
+	err = tf.WritePkg(data)
+	if err != nil {
+		fmt.Printf("send data to server err, err=%v\n", err)
+		return err
+	}
+
+	tf = utils.Transfer{
 		Conn: conn,
 	}
 	mes, err = tf.ReadPkg()

@@ -15,7 +15,7 @@ var (
 )
 
 //展示在线的用户列表
-func queryAllOnlineUsers(user *model.CurUser) {
+func queryAllOnlineUsers(user *model.CurUser) error {
 	//fmt.Println("在线用户列表：")
 	//for _, user := range onlineUsers {
 	//	fmt.Printf("%s在线\n", user.UserName)
@@ -35,8 +35,9 @@ func queryAllOnlineUsers(user *model.CurUser) {
 	err := tf.WritePkg(mesByte)
 	if err != nil {
 		fmt.Printf("send query online mes err, err=%s\n", err.Error())
-		return
+		return err
 	}
+	return nil
 }
 
 func showAllOnlineUser(onlineData *string) {

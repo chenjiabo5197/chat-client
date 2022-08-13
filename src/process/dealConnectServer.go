@@ -37,7 +37,10 @@ func showMenu(user *model.CurUser) {
 		switch key {
 		case 1:
 			// fmt.Println("1")
-			queryAllOnlineUsers(user)
+			err := queryAllOnlineUsers(user)
+			if err != nil {
+				return
+			}
 		case 2:
 			//fmt.Println("2")
 			fmt.Println("请输入要发送的消息:")
@@ -107,8 +110,15 @@ func serverProcessMes(conn net.Conn) {
 			//更新onlineUsers 这个map
 			//updateUserStatus(&notifyMes)
 		case common.SmsRespMesType:
-			//服务器转发的消息
+			//服务器转发的群发消息
 			err = showGroupSms(&mes)
+			if err != nil {
+				fmt.Println("err=", err)
+				return
+			}
+		case common.SmsToOneRespMesType:
+			//服务器转发的1对1消息
+			err = showOne2OneSms(&mes)
 			if err != nil {
 				fmt.Println("err=", err)
 				return

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"process"
 	"strconv"
+	"utils"
 )
 
 func Init() (recommend int) {
@@ -29,43 +30,31 @@ func Init() (recommend int) {
 }
 
 /*
-	用于接收登录用户输入的用户id和密码
+	用于接收登录用户输入的用户名和密码
 */
-func inputUser() (userId int, userPwd string, err error) {
+func inputUser() (userName string, userPwd string, err error) {
 
-	fmt.Println("请输入用户id:")
-	var inputId string
-	_, _ = fmt.Scanln(&inputId)
-
-	userId, err = strconv.Atoi(inputId)
-	if err != nil {
-		fmt.Println("用户id必须是数字")
-		return
-	}
+	fmt.Println("请输入用户名:")
+	_, _ = fmt.Scanln(&userName)
+	//userId, err = strconv.Atoi(inputId)
+	//if err != nil {
+	//	fmt.Println("用户id必须是数字")
+	//	return
+	//}
 	fmt.Println("请输入用户密码:")
 	_, _ = fmt.Scanln(&(userPwd))
 	return
 }
 
-/*
-	用于接收注册用户输入的用户id，密码和名字
-*/
+//用于接收注册用户输入的用户id，密码和名字
 func inputRegisterUser() (user common.User, err error) {
 
-	fmt.Println("请输入用户id:")
-	var inputId string
-	_, _ = fmt.Scanln(&inputId)
 	user = common.User{}
-
-	user.UserId, err = strconv.Atoi(inputId)
-	if err != nil {
-		fmt.Println("用户id必须是数字")
-		return
-	}
+	fmt.Println("请输入用户名:")
+	_, _ = fmt.Scanln(&(user.UserName))
 	fmt.Println("请输入用户密码:")
 	_, _ = fmt.Scanln(&(user.UserPwd))
-	fmt.Println("请输入用户姓名:")
-	_, _ = fmt.Scanln(&(user.UserName))
+	user.UserId = utils.GetMd5Value(user.UserName)
 	return
 }
 
@@ -83,12 +72,12 @@ func main() {
 		} else {
 			switch recommend {
 			case 1:
-				userId, userPwd, err := inputUser()
+				userName, userPwd, err := inputUser()
 				if err != nil {
 					continue
 				}
 				up := process.UserProcessor{}
-				err = up.LoginHandler(userId, userPwd)
+				err = up.LoginHandler(userName, userPwd)
 				if err != nil {
 					fmt.Println("登陆失败,err=", err)
 				}

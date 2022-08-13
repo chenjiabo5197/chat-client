@@ -12,7 +12,7 @@ import (
 type SmsProcessor struct {
 	Conn     net.Conn
 	UserName string
-	UserId   int
+	UserId   string
 }
 
 //向服务器发送广播聊天消息
@@ -20,6 +20,7 @@ func (sm *SmsProcessor) sendGroupSms(content string) (err error) {
 	var smsMes common.SmsMes
 	smsMes.Content = content
 	smsMes.UserId = sm.UserId
+	smsMes.UserName = sm.UserName
 	data, err := json.Marshal(smsMes)
 	if err != nil {
 		fmt.Println("smsMes序列化失败")
@@ -35,7 +36,8 @@ func (sm *SmsProcessor) sendToOneSms(content, userName string) (err error) {
 	var smsMes common.SmsMes
 	smsMes.Content = content
 	smsMes.UserId = sm.UserId
-	smsMes.Target = userName
+	smsMes.UserName = sm.UserName
+	smsMes.SmsMesTarget = userName
 	data, err := json.Marshal(smsMes)
 	if err != nil {
 		fmt.Println("smsMes序列化失败")
