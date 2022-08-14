@@ -171,19 +171,7 @@ func (up *UserProcessor) RegisterHandler(user common.User) (err error) {
 		fmt.Println("读取服务器返回出错,err=", err)
 		return
 	}
-
-	//将服务器返回消息反序列化为LoginResMes结构体
-	var rigisterRespMes common.RegisterRespMes
-	err = json.Unmarshal([]byte(mes.Data), &rigisterRespMes)
-	if err != nil {
-		fmt.Println("反序列化服务器返回结果出错,err=", err)
-		return
-	}
-
-	//判断是否注册成功
-	if rigisterRespMes.RespCode == 200 {
-		return nil
-	} else {
-		return errors.New(rigisterRespMes.Error)
-	}
+	// 解析服务器的返回数据
+	err = ParseServerResp(&mes)
+	return
 }

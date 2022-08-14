@@ -14,8 +14,12 @@ var (
 	//curUser     model.CurUser                //初始化，用于向服务器发送聊天信息
 )
 
+type Online struct {
+
+}
+
 //展示在线的用户列表
-func queryAllOnlineUsers(user *model.CurUser) error {
+func (ol *Online)queryAllOnlineUsers(user *model.CurUser) error {
 	//fmt.Println("在线用户列表：")
 	//for _, user := range onlineUsers {
 	//	fmt.Printf("%s在线\n", user.UserName)
@@ -40,7 +44,7 @@ func queryAllOnlineUsers(user *model.CurUser) error {
 	return nil
 }
 
-func showAllOnlineUser(onlineData *string) {
+func (ol *Online)showAllOnlineUser(onlineData *string) {
 	var onlineUsername []string
 	err := json.Unmarshal([]byte(*onlineData), &onlineUsername)
 	if err != nil {

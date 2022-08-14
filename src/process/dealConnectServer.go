@@ -3,6 +3,7 @@ package process
 import (
 	"common"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"model"
 	"net"
@@ -36,8 +37,8 @@ func showMenu(user *model.CurUser) {
 		}
 		switch key {
 		case 1:
-			// fmt.Println("1")
-			err := queryAllOnlineUsers(user)
+			ol := Online{}
+			err := ol.queryAllOnlineUsers(user)
 			if err != nil {
 				return
 			}
@@ -98,38 +99,56 @@ func serverProcessMes(conn net.Conn) {
 			return
 		}
 		switch mes.Type {
-		case common.NotifyUserStatusMesType:
-			//上线/下线通知
-			var notifyMes common.NotifyUserStatusMes
-			err := json.Unmarshal([]byte(mes.Data), &notifyMes)
-			if err != nil {
-				fmt.Println("notifyMes反序列化失败,err=", err)
-				return
+			case common.NotifyUserStatusMesType:  //上线/下线通知
+				var notifyMes common.NotifyUserStatusMes
+				err := json.Unmarshal([]byte(mes.Data), &notifyMes)
+				if err != nil {
+					fmt.Println("notifyMes反序列化失败,err=", err)
+					return
+				}
+				fmt.Printf("recv server online and offline mes, data=%s\n", utils.Struct2String(notifyMes))
+				//更新onlineUsers 这个map
+				//updateUserStatus(&notifyMes)
+			case common.RecvSmsMesType:  //服务器转发的群发消息
+				err = showGroupSms(&mes)
+				if err != nil {
+					fmt.Println("err=", err)
+					return
+				}
+			case common.RecvSmsToOneMesType:  //服务器转发的1对1消息
+				err = showOne2OneSms(&mes)
+				if err != nil {
+					fmt.Println("err=", err)
+					return
+				}
+			case common.SmsRespMesType:  //发送的1对1或群发消息失败还是成功
+				err = ParseServerResp(&mes)
+				if err != nil {
+					fmt.Println("发送消息失败，err=", err)
+				}else {
+					fmt.Println("发送消息成功")
+				}
+			case common.AllOnlineRespType: // 用户在线消息
+				ol := Online{}
+				ol.showAllOnlineUser(&mes.Data)
+			default:
+				fmt.Println("未知数据类型")
 			}
-			fmt.Printf("recv server online and offline mes, data=%s\n", utils.Struct2String(notifyMes))
-			//更新onlineUsers 这个map
-			//updateUserStatus(&notifyMes)
-		case common.SmsRespMesType:
-			//服务器转发的群发消息
-			err = showGroupSms(&mes)
-			if err != nil {
-				fmt.Println("err=", err)
-				return
-			}
-		case common.SmsToOneRespMesType:
-			//服务器转发的1对1消息
-			err = showOne2OneSms(&mes)
-			if err != nil {
-				fmt.Println("err=", err)
-				return
-			}
-		case common.AllOnlineRespType: // 用户在线消息
-			showAllOnlineUser(&mes.Data)
-		default:
-			fmt.Println("未知数据类型")
-		}
+	}
+}
 
-		//打印读取的消息
-		//fmt.Println("mes=",mes)
+func ParseServerResp(message *common.Message) (err error) {
+	//将服务器返回消息反序列化为LoginResMes结构体
+	var respMes common.StatusRespMes
+	err = json.Unmarshal([]byte(message.Data), &respMes)
+	if err != nil {
+		return errors.New("反序列化服务器返回结果出错")
+	}
+
+	//判断返回消失成功还是失败
+	if respMes.RespCode == 200 {
+		return nil
+	} else {
+		return errors.New(respMes.Error)
 	}
 }
