@@ -44,7 +44,7 @@ func (t *Transfer) ReadPkg() (mes common.Message, err error) {
 	//将读取到的消息反序列化
 	err = json.Unmarshal(t.buf[:dataLen], &mes)
 	if err != nil {
-		fmt.Println("消息反序列化失败,err=", err)
+		fmt.Printf("消息反序列化失败,err=%v||data=%s\n", err, t.buf[:dataLen])
 		return
 	}
 	return

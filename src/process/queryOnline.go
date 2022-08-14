@@ -15,11 +15,10 @@ var (
 )
 
 type Online struct {
-
 }
 
 //展示在线的用户列表
-func (ol *Online)queryAllOnlineUsers(user *model.CurUser) error {
+func (ol *Online) queryAllOnlineUsers(user *model.CurUser) error {
 	//fmt.Println("在线用户列表：")
 	//for _, user := range onlineUsers {
 	//	fmt.Printf("%s在线\n", user.UserName)
@@ -44,11 +43,15 @@ func (ol *Online)queryAllOnlineUsers(user *model.CurUser) error {
 	return nil
 }
 
-func (ol *Online)showAllOnlineUser(onlineData *string) {
+func (ol *Online) showAllOnlineUser(onlineData *string) {
 	var onlineUsername []string
 	err := json.Unmarshal([]byte(*onlineData), &onlineUsername)
 	if err != nil {
 		fmt.Printf("unmarshal onlineUsername err, err=%s\n", err.Error())
+		return
+	}
+	if len(onlineUsername) == 0 {
+		fmt.Println("当前无人在线")
 		return
 	}
 	fmt.Println("在线用户：")

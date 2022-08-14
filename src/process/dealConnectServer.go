@@ -99,41 +99,47 @@ func serverProcessMes(conn net.Conn) {
 			return
 		}
 		switch mes.Type {
-			case common.NotifyUserStatusMesType:  //上线/下线通知
-				var notifyMes common.NotifyUserStatusMes
-				err := json.Unmarshal([]byte(mes.Data), &notifyMes)
-				if err != nil {
-					fmt.Println("notifyMes反序列化失败,err=", err)
-					return
-				}
-				fmt.Printf("recv server online and offline mes, data=%s\n", utils.Struct2String(notifyMes))
-				//更新onlineUsers 这个map
-				//updateUserStatus(&notifyMes)
-			case common.RecvSmsMesType:  //服务器转发的群发消息
-				err = showGroupSms(&mes)
-				if err != nil {
-					fmt.Println("err=", err)
-					return
-				}
-			case common.RecvSmsToOneMesType:  //服务器转发的1对1消息
-				err = showOne2OneSms(&mes)
-				if err != nil {
-					fmt.Println("err=", err)
-					return
-				}
-			case common.SmsRespMesType:  //发送的1对1或群发消息失败还是成功
-				err = ParseServerResp(&mes)
-				if err != nil {
-					fmt.Println("发送消息失败，err=", err)
-				}else {
-					fmt.Println("发送消息成功")
-				}
-			case common.AllOnlineRespType: // 用户在线消息
-				ol := Online{}
-				ol.showAllOnlineUser(&mes.Data)
-			default:
-				fmt.Println("未知数据类型")
+		case common.NotifyUserStatusMesType: //上线/下线通知
+			var notifyMes common.NotifyUserStatusMes
+			err := json.Unmarshal([]byte(mes.Data), &notifyMes)
+			if err != nil {
+				fmt.Println("notifyMes反序列化失败,err=", err)
+				return
 			}
+			fmt.Printf("recv server online and offline mes, data=%s\n", utils.Struct2String(notifyMes))
+			//更新onlineUsers 这个map
+			//updateUserStatus(&notifyMes)
+		case common.RecvSmsMesType: //服务器转发的群发消息
+			err = showGroupSms(&mes)
+			if err != nil {
+				fmt.Println("err=", err)
+				return
+			}
+		case common.RecvSmsToOneMesType: //服务器转发的1对1消息
+			err = showOne2OneSms(&mes, common.RecvSmsToOneMesType)
+			if err != nil {
+				fmt.Println("err=", err)
+				return
+			}
+		case common.OfflineRecvSmsToOneMesType: //服务器转发的离线1对1消息
+			err = showOne2OneSms(&mes, common.OfflineRecvSmsToOneMesType)
+			if err != nil {
+				fmt.Println("err=", err)
+				return
+			}
+		case common.SmsRespMesType: //发送的1对1或群发消息失败还是成功
+			err = ParseServerResp(&mes)
+			if err != nil {
+				fmt.Println("发送消息失败，err=", err)
+			} else {
+				fmt.Println("发送消息成功")
+			}
+		case common.AllOnlineRespType: // 用户在线消息
+			ol := Online{}
+			ol.showAllOnlineUser(&mes.Data)
+		default:
+			fmt.Println("未知数据类型")
+		}
 	}
 }
 

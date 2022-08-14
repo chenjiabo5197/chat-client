@@ -90,7 +90,7 @@ func (up *UserProcessor) LoginHandler(userName string, userPwd string) (err erro
 		curUser := &model.CurUser{}
 		curUser.Conn = conn
 		curUser.UserId = utils.GetMd5Value(userName)
-		curUser.UserName = loginRespMes.UserName
+		curUser.UserName = loginRespMes.User.UserName
 		curUser.UserStatus = common.UserOnline
 
 		//显示服务器返回的在线用户列表

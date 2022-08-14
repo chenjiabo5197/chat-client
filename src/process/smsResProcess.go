@@ -20,14 +20,17 @@ func showGroupSms(mes *common.Message) (err error) {
 }
 
 //展示服务器转发的1对1聊天信息
-func showOne2OneSms(mes *common.Message) (err error) {
+func showOne2OneSms(mes *common.Message, mesType common.MesType) (err error) {
 	var smsMes common.SmsRespMes
 	err = json.Unmarshal([]byte(mes.Data), &smsMes)
 	if err != nil {
 		fmt.Println("smsResMes反序列化失败,err=", err)
 		return
 	}
-
-	fmt.Printf("用户%s,向你单独发送%s\n", smsMes.SmsRespFrom, smsMes.Content)
+	if mesType == common.RecvSmsToOneMesType {
+		fmt.Printf("用户%s,向你单独发送%s\n", smsMes.SmsRespFrom, smsMes.Content)
+	} else if mesType == common.OfflineRecvSmsToOneMesType {
+		fmt.Printf("用户%s,离线期间向你单独发送%s\n", smsMes.SmsRespFrom, smsMes.Content)
+	}
 	return
 }
